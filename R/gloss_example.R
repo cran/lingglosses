@@ -7,41 +7,49 @@
 #' @param transliteration character vector of the length one for the transliteration line.
 #' @param glosses character vector of the length one for the glosses line.
 #' @param free_translation character vector of the length one for the free translation line.
-#' @param orthography character vector of the length one for the orthography line (above translation).
+#' @param annotation character vector of the length one for the annotation line (above translation).
+#' @param grammaticality character vector with the grammaticality value.
 #' @param comment character vector of the length one for the comment line (under the free translation line).
 #' @param line_length integer vector of the length one that denotes maximum number of characters per one line.
 #' @param italic_transliteration logical variable that denotes, whether user wants to italicize your example.
 #' @param drop_transliteration logical variable that denotes, whether user wants to have an example without transliteration.
 #' @param intext logical variable that denotes, whether example should be considered as part of the text (\code{TRUE}) or as a standalone paragraph (\code{FALSE})
+#' @param write_to_db logical variable that denotes, whether example should be added to the example database.
 #' @return html/latex output(s) with glossed examples.
 #'
 #' @examples
 #' gloss_example("bur-e-**ri** c'in-ne-s:u",
-#'                "fly-NPST-**INF** know-HAB-NEG",
-#'                "I cannot fly. (Zilo Andi, East Caucasian)",
-#'                comment = "(lit. do not know how to)")
+#'               "fly-NPST-**INF** know-HAB-NEG",
+#'               "I cannot fly. (Zilo Andi, East Caucasian)",
+#'               grammaticality = "*",
+#'               comment = "(lit. do not know how to)")
 #'
 #' gloss_example("bur-e-**ri** c'in-ne-s:u",
-#'                "fly-NPST-**INF** know-HAB-NEG",
-#'                "I cannot fly.",
-#'                intext = TRUE)
+#'               "fly-NPST-**INF** know-HAB-NEG",
+#'               "I cannot fly.",
+#'               intext = TRUE)
 #'
 #' @importFrom knitr is_latex_output
 #' @importFrom kableExtra kable_minimal
 #' @importFrom kableExtra kbl
 #' @importFrom kableExtra footnote
-#' @importFrom utils write.table
 #' @export
 
 gloss_example <- function(transliteration,
                           glosses,
                           free_translation = "",
                           comment = "",
-                          orthography = "",
+                          annotation = NULL,
+                          grammaticality = NULL,
                           line_length = 70,
                           italic_transliteration = TRUE,
                           drop_transliteration = FALSE,
-                          intext = FALSE){
+                          intext = FALSE,
+                          write_to_db = TRUE){
+
+# add 1 to the counter -----------------------------------------------------
+  example_counter <- getOption("lingglosses.example_counter")
+  options("lingglosses.example_counter" = as.double(example_counter)+1)
 
 # fix for multiple glosses line --------------------------------------------
   length_glosses <- length(glosses)
@@ -50,18 +58,17 @@ gloss_example <- function(transliteration,
   }
 
 # check arguments ----------------------------------------------------------
-  # lapply(names(formals(gloss_example))[1:2],
-  #        function(argument){
-  #          if(length(eval(parse(text = argument))) != 1 |
-  #             typeof(eval(parse(text = argument))) != "character"){
-  #            stop(paste0(argument,
-  #                        " argument should be a character vector of length 1"))
-  #          }
-  #        })
-
   if(length(line_length) != 1 | typeof(line_length) != "double"){
     stop(paste0("line_length",
                 " argument should be a character vector of length 1"))
+  }
+
+# fix the apostrophe problem
+  if(!drop_transliteration){
+    transliteration <- gsub(pattern = "[\u2019\u02BC]", replacement = "'", transliteration)}
+  glosses <- gsub(pattern = "[\u2019\u02BC]", replacement = "'", glosses)
+  if(!is.null(grammaticality)){
+    grammaticality <- gsub(pattern = "\\*", replacement = "\uFF0A", grammaticality)
   }
 
 # split arguments by spaces ------------------------------------------------
@@ -72,11 +79,6 @@ gloss_example <- function(transliteration,
   transliteration <- unlist(strsplit(transliteration, " "))
   glosses_by_word <- unlist(strsplit(glosses, " "))
 
-
-  if(length(orthography) > 0){
-    orthography <- unlist(strsplit(orthography, " "))
-  }
-
 # prepare vector of splits of the glosses by line --------------------------
   longest <- if(sum(nchar(transliteration)) > sum(nchar(glosses))){
     transliteration
@@ -84,27 +86,29 @@ gloss_example <- function(transliteration,
     glosses_by_word
   }
 
-# check that glosses and transliteration have the same length --------------
-  # if(length(transliteration) != length(glosses_by_word)){
-  #   stop(paste0("There is a different number of words and glosses in the
-  #               following example: ", paste0(transliteration, collapse = " ")))
-  # }
-  #
 
-  if(length(orthography) > 0 & length(transliteration) != length(orthography)){
-    stop(paste0("There is a different number of words in orthography and
-                transliteration in the following example: ",
-                paste0(transliteration, collapse = " ")))
+# add example to the example list ------------------------------------------
+  if(write_to_db){
+    glossed_df <- lingglosses::convert_to_df(
+      transliteration = paste0(transliteration, collapse = " "),
+      glosses = glosses,
+      free_translation = free_translation,
+      comment = comment,
+      annotation = annotation,
+      drop_transliteration = drop_transliteration)
   }
 
 # add glosses to the document gloss list -----------------------------------
   single_gl <- unlist(strsplit(glosses_by_word, "[-\\.=:\\)\\(!\\?]"))
+  starts_with_punctuation <- single_gl[1] == ""
   single_gl <- lingglosses::add_gloss(single_gl)
+  if(starts_with_punctuation){single_gl <- c("", single_gl)}
 
-# get delimeters back ------------------------------------------------------
-  delimeters <- unlist(strsplit(glosses, "[^-:\\.= \\)\\(!\\?]"))
-  delimeters <- c(delimeters[delimeters != ""], "")
-  glosses <- paste0(single_gl, delimeters, collapse = "")
+# get delimiters back ------------------------------------------------------
+  delimiters <- unlist(strsplit(glosses,
+"[^-:\\.= \\)\\(!\\?\u201E\u201C\u2019\u201D\u00BB\u00AB\u201F]"))
+  delimiters <- c(delimiters[delimiters != ""], "")
+  glosses <- paste0(single_gl, delimiters, collapse = "")
   glosses <- gsub("<span style=", "<span_style=", glosses)
   glosses <- unlist(strsplit(glosses, " "))
   glosses <- gsub("<span_style=", "<span style=", glosses)
@@ -134,9 +138,9 @@ gloss_example <- function(transliteration,
       sep2 <- ""
     }
 
-
     result <- paste0(inline_transliteration,
                      sep1,
+                     grammaticality,
                      paste(glosses, collapse = " "),
                      if(nchar(free_translation) > 0){
                        paste0(" '", free_translation, "'")} else {""},
@@ -154,23 +158,38 @@ gloss_example <- function(transliteration,
           paste(transliteration[splits_by_line == i], collapse = " "),
           paste(glosses_by_word[splits_by_line == i], collapse = " "),
           free_translation = if(i == max(splits_by_line)){free_translation} else {""},
-          orthography = if(length(orthography) > 0){
-            paste(orthography[splits_by_line == i], collapse = " ")},
+          grammaticality = if(i == min(splits_by_line)){grammaticality} else {NULL},
+          annotation = if(!is.null(annotation)){
+            paste(annotation[splits_by_line == i], collapse = " ")} else {""},
           comment = if(i == max(splits_by_line)){comment} else {""},
           italic_transliteration = FALSE,
           line_length = line_length,
           drop_transliteration = drop_transliteration,
-          intext = FALSE)
+          intext = FALSE,
+          write_to_db = FALSE)
       })
     } else {
 
 # combine everything into table --------------------------------------------
-      orth <- if(length(orthography) > 0){orthography} else{NULL}
+      if(!is.null(annotation)){
+        annotation <- unlist(strsplit(annotation, " "))
+      }
+
+      ann <- if(!is.null(annotation)){annotation} else{NULL}
       trans <- if(!drop_transliteration){transliteration} else{NULL}
-      for_matrix <- c(orth, trans, glosses)
-      nrow_matrix <- length_glosses + (length(orth) > 0) + (length(trans) > 0)
+      for_matrix <- c(ann, trans, glosses)
+      nrow_matrix <- length_glosses + (length(ann) > 0) + (length(trans) > 0)
 
       result <- matrix(for_matrix, nrow = nrow_matrix, byrow = TRUE)
+
+      if(!is.null(grammaticality)){
+        if(nrow_matrix == 2){
+          result <- cbind(matrix(c(grammaticality, "")), result)
+        } else if(nrow_matrix == 3){
+          result <- cbind(matrix(c("", grammaticality, "")), result)
+        }
+      }
+
       result <- kableExtra::kbl(result, align = "l", centering = FALSE,
                                 escape = FALSE, vline = "")
       result <- kableExtra::kable_minimal(result,

@@ -9,11 +9,13 @@ gloss_example(
   glosses,
   free_translation = "",
   comment = "",
-  orthography = "",
+  annotation = NULL,
+  grammaticality = NULL,
   line_length = 70,
   italic_transliteration = TRUE,
   drop_transliteration = FALSE,
-  intext = FALSE
+  intext = FALSE,
+  write_to_db = TRUE
 )
 }
 \arguments{
@@ -25,7 +27,9 @@ gloss_example(
 
 \item{comment}{character vector of the length one for the comment line (under the free translation line).}
 
-\item{orthography}{character vector of the length one for the orthography line (above translation).}
+\item{annotation}{character vector of the length one for the annotation line (above translation).}
+
+\item{grammaticality}{character vector with the grammaticality value.}
 
 \item{line_length}{integer vector of the length one that denotes maximum number of characters per one line.}
 
@@ -34,6 +38,8 @@ gloss_example(
 \item{drop_transliteration}{logical variable that denotes, whether user wants to have an example without transliteration.}
 
 \item{intext}{logical variable that denotes, whether example should be considered as part of the text (\code{TRUE}) or as a standalone paragraph (\code{FALSE})}
+
+\item{write_to_db}{logical variable that denotes, whether example should be added to the example database.}
 }
 \value{
 html/latex output(s) with glossed examples.
@@ -43,14 +49,15 @@ Creates an interlinear glossed example for linguistics.
 }
 \examples{
 gloss_example("bur-e-**ri** c'in-ne-s:u",
-               "fly-NPST-**INF** know-HAB-NEG",
-               "I cannot fly. (Zilo Andi, East Caucasian)",
-               comment = "(lit. do not know how to)")
+              "fly-NPST-**INF** know-HAB-NEG",
+              "I cannot fly. (Zilo Andi, East Caucasian)",
+              grammaticality = "*",
+              comment = "(lit. do not know how to)")
 
 gloss_example("bur-e-**ri** c'in-ne-s:u",
-               "fly-NPST-**INF** know-HAB-NEG",
-               "I cannot fly.",
-               intext = TRUE)
+              "fly-NPST-**INF** know-HAB-NEG",
+              "I cannot fly.",
+              intext = TRUE)
 
 }
 \author{

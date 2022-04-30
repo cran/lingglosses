@@ -8,7 +8,6 @@
 #' @param all_possible_variants logical. Some glosses have multiple definitions.
 #' @param annotate_problematic logical. Whether emphasize duplicated and definitionless glosses
 #' @return a string with glosses and their definitions gathered from \code{definition_source} table.
-#'hab
 #' @importFrom knitr asis_output
 #' @importFrom knitr opts_current
 #' @importFrom knitr is_latex_output
@@ -43,8 +42,8 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
     stop("Argument 'definition_source' should have an attribute 'data.frame'.")
   }
 
-  if(sum(c("gloss", "definition") %in% names(definition_source)) != 2){
-    stop("'definition_source' should have columns 'gloss' and 'definition'.")
+  if(sum(c("gloss", "definition_en") %in% names(definition_source)) != 2){
+    stop("'definition_source' should have columns 'gloss' and 'definition_en'.")
   }
 
   if(!("weight" %in% names(definition_source))){
@@ -74,18 +73,21 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
 
     # change definition from lingglosses::glosses to user's values -------------
     if(!identical(definition_source, lingglosses::glosses_df)){
-      glosses_dataset$definition <- unlist(
+      glosses_dataset$definition_en <- unlist(
         lapply(seq_along(glosses_dataset$gloss), function(i){
           id <- which(definition_source$gloss %in% glosses_dataset$gloss[i])
           ifelse(length(id) > 0,
-                 definition_source$definition[id],
-                 glosses_dataset$definition[i])
+                 definition_source$definition_en[id],
+                 glosses_dataset$definition_en[i])
         })
       )
     }
 
     # keep only those that are present in the document -------------------------
     glosses_dataset <- glosses_dataset[glosses_dataset$gloss %in% gloss_list, ]
+
+    # remove glosses with punctuation -----------------------------------------
+    glosses_dataset <- glosses_dataset[!grepl("[:punct:]", glosses_dataset$gloss),]
 
     # for those glosses that are not present in our and user's database --------
     definitionless <- gloss_list[!(gloss_list %in% glosses_dataset$gloss)]
@@ -94,7 +96,7 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
       glosses_dataset <- unique(rbind(
         glosses_dataset,
         data.frame(gloss = definitionless,
-                   definition = "",
+                   definition_en = "",
                    source = "",
                    weight = 1)))
     }
@@ -135,7 +137,7 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
 
     # create an output
     res <- paste(small_caps(glosses_dataset$gloss),
-                 glosses_dataset$definition,
+                 glosses_dataset$definition_en,
                  sep = gloss_sep, collapse = "; ")
     knitr::asis_output(res)
 
