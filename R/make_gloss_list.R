@@ -51,7 +51,7 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
   }
 
   if(!("source" %in% names(definition_source))){
-    definition_source$source <- ""
+    definition_source$source <- "from the user"
   }
 
   # get glosses --------------------------------------------------------------
@@ -61,6 +61,10 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
                                                        header = FALSE,
                                                        encoding = "UTF-8"))))
 
+    # remove glosses with punctuation -----------------------------------------
+    gloss_list <- gsub("\\W", "", gloss_list)
+    gloss_list <- gloss_list[gloss_list != ""]
+
     # refresh glosses ----------------------------------------------------------
     if(getOption("lingglosses.refresh_glosses_list")){
       write.table(x = NULL, file = gloss_file_name, row.names = FALSE,
@@ -68,26 +72,24 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
     }
 
     # create a variable with all glosses that will be modified -----------------
-    glosses_dataset <- unique(lingglosses::glosses_df[
-      lingglosses::glosses_df$gloss %in% gloss_list, ])
+    glosses_dataset <- unique(
+      rbind(definition_source[definition_source$gloss %in% gloss_list, ],
+      lingglosses::glosses_df[lingglosses::glosses_df$gloss %in% gloss_list, ]))
+
+    glosses_dataset <- glosses_dataset[!duplicated(glosses_dataset[, 1:2]),]
+
 
     # change definition from lingglosses::glosses to user's values -------------
     if(!identical(definition_source, lingglosses::glosses_df)){
-      glosses_dataset$definition_en <- unlist(
-        lapply(seq_along(glosses_dataset$gloss), function(i){
-          id <- which(definition_source$gloss %in% glosses_dataset$gloss[i])
-          ifelse(length(id) > 0,
-                 definition_source$definition_en[id],
-                 glosses_dataset$definition_en[i])
-        })
-      )
+      from_user <- glosses_dataset[glosses_dataset$source == "from the user",]$gloss
+      glosses_dataset <-
+        rbind(glosses_dataset[glosses_dataset$gloss %in% from_user &
+                                glosses_dataset$source == "from the user",],
+              glosses_dataset[!(glosses_dataset$gloss %in% from_user),])
     }
 
     # keep only those that are present in the document -------------------------
     glosses_dataset <- glosses_dataset[glosses_dataset$gloss %in% gloss_list, ]
-
-    # remove glosses with punctuation -----------------------------------------
-    glosses_dataset <- glosses_dataset[!grepl("[:punct:]", glosses_dataset$gloss),]
 
     # for those glosses that are not present in our and user's database --------
     definitionless <- gloss_list[!(gloss_list %in% glosses_dataset$gloss)]
@@ -100,6 +102,8 @@ make_gloss_list <- function(definition_source = lingglosses::glosses_df,
                    source = "",
                    weight = 1)))
     }
+
+    glosses_dataset
 
     # sort after addition definitionless glosses -------------------------------
     glosses_dataset <- glosses_dataset[order(glosses_dataset$gloss),]
