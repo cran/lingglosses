@@ -39,6 +39,8 @@
 #' @importFrom kableExtra kable_minimal
 #' @importFrom kableExtra kbl
 #' @importFrom kableExtra footnote
+#' @importFrom methods missingArg
+#' @importFrom methods hasArg
 #' @export
 
 gloss_example <- function(transliteration,
@@ -53,14 +55,31 @@ gloss_example <- function(transliteration,
                           video_width = 320,
                           video_height = 240,
                           line_length = 70,
-                          italic_transliteration = TRUE,
+                          italic_transliteration = getOption("lingglosses.italic_transliteration"),
                           drop_transliteration = FALSE,
                           intext = FALSE,
                           write_to_db = TRUE){
 
 # add 1 to the counter -----------------------------------------------------
+# it is for the function convert_to_df()
   example_counter <- getOption("lingglosses.example_counter")
   options("lingglosses.example_counter" = as.double(example_counter)+1)
+
+# fix for missing transliteration -----------------------------------------
+  if(methods::missingArg(transliteration)){
+    drop_transliteration = TRUE
+  }
+# fix for missing glosses -----------------------------------------
+  if(methods::missingArg(glosses) & methods::hasArg(transliteration)){
+    drop_transliteration = TRUE
+    if(italic_transliteration){
+      glosses = paste0("_", unlist(strsplit(transliteration, " ")), "_",
+                       collapse = " ")
+    } else {
+      glosses = transliteration
+    }
+
+  }
 
 # fix for multiple glosses line --------------------------------------------
   length_glosses <- length(glosses)
@@ -76,14 +95,18 @@ gloss_example <- function(transliteration,
 
 # fix the apostrophe and "> <" problem
   if(!drop_transliteration){
+    transliteration <- gsub(pattern = "\\s{2,}", replacement = " ", transliteration)
     transliteration <- gsub(pattern = "[\u2019\u02BC]", replacement = "'", transliteration)
     transliteration <- gsub(pattern = "<", replacement = "&lt;", transliteration)
     transliteration <- gsub(pattern = ">", replacement = "&gt;", transliteration)
     transliteration <- gsub(pattern = "!\\[\\]\\(", replacement = "pictures_inside_turn_me_back_please", transliteration)
     transliteration <- gsub(pattern = "\\[", replacement = "\uFF3B", transliteration)
     transliteration <- gsub(pattern = "\\]", replacement = "\uFF3D", transliteration)
+    transliteration <- gsub(pattern = "\t", replacement = " ", transliteration)
     transliteration <- gsub(pattern = "pictures_inside_turn_me_back_please", replacement = "!\\[\\]\\(", transliteration)
-    }
+  }
+  glosses <- gsub(pattern = "\\s{2,}", replacement = " ", glosses)
+  glosses <- gsub(pattern = "\t", replacement = " ", glosses)
   glosses <- gsub(pattern = "[\u2019\u02BC]", replacement = "'", glosses)
   glosses <- gsub(pattern = "!\\[\\]\\(", replacement = "pictures_inside_turn_me_back_please", glosses)
   glosses <- gsub(pattern = "\\[", replacement = "\uFF3B", glosses)
@@ -127,7 +150,7 @@ gloss_example <- function(transliteration,
   }
 
 # add glosses to the document gloss list -----------------------------------
-  single_gl <- unlist(strsplit(glosses_by_word, "[-\\.=:\\)\\(!\\?<>\\~\uFF3D\uFF3B]"))
+  single_gl <- unlist(strsplit(glosses_by_word, "[-\\.=:\\)\\(!\\?<>\\~\\+\uFF3D\uFF3B]"))
   starts_with_punctuation <- single_gl[1] == ""
   single_gl <- gsub(pattern = "<", replacement = "&lt;", single_gl)
   single_gl <- gsub(pattern = ">", replacement = "&gt;", single_gl)
@@ -136,7 +159,7 @@ gloss_example <- function(transliteration,
 
 # get delimiters back ------------------------------------------------------
   delimiters <- unlist(strsplit(glosses,
-"[^-:\\.= \\)\\(!\\?\u201E\u201C\u2019\u201D\u00BB\u00AB\u201F<>\\~\uFF3B\uFF3D]"))
+"[^-:\\.= \\)\\(!\\?\u201E\u201C\u2019\u201D\u00BB\u00AB\u201F<>\\~\\+\uFF3B\uFF3D]"))
   delimiters <- c(delimiters[delimiters != ""], "")
   if(!starts_with_punctuation){single_gl <- c(single_gl, rep("", sum(delimiters == ">")))}
   glosses <- paste0(single_gl, delimiters, collapse = "")
@@ -185,6 +208,9 @@ gloss_example <- function(transliteration,
 
     if(length(unique(splits_by_line)) > 1){
       multiline_result <- lapply(unique(splits_by_line), function(i){
+        nchar_tr <- nchar(paste(transliteration[splits_by_line == i], collapse = " "))
+        nchar_gl <- nchar(paste(glosses_by_word[splits_by_line == i], collapse = " "))
+        max_nchar <- ifelse(nchar_tr > nchar_gl, nchar_tr, nchar_gl)
         gloss_example(
           transliteration = paste(transliteration[splits_by_line == i],
                                   collapse = " "),
@@ -195,7 +221,7 @@ gloss_example <- function(transliteration,
             paste(annotation[splits_by_line == i], collapse = " ")} else {NULL},
           comment = if(i == max(splits_by_line)){comment} else {""},
           italic_transliteration = FALSE,
-          line_length = nchar(paste(glosses_by_word[splits_by_line == i], collapse = " "))+1,
+          line_length = max_nchar+1,
           drop_transliteration = drop_transliteration,
           audio_path = if(i == max(splits_by_line)){audio_path} else {NULL},
           audio_label = audio_label,
