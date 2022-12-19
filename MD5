@@ -1,6 +1,6 @@
-8c09f173d0f34789dbc68a21bdfbde67 *DESCRIPTION
+1b12ff689bdad181cf527b774bb7ef97 *DESCRIPTION
 444fb66c87d04e6a18261ce4a64a3c7d *NAMESPACE
-6ae6274451d9cbf3fa23cfce7d8b0177 *NEWS.md
+d0a64234291215caa866f3d29b209e70 *NEWS.md
 fd8fd155f9c392fa6f085a2daa41901d *R/add_gloss.R
 1c72cfa6afa6fd86e3337cffaedb8008 *R/convert_to_df.R
 38860f6342212a418613579e37413488 *R/get_examples_db.R
@@ -11,7 +11,7 @@ cf8b76fe3c05f5c77f25f38f3402152c *R/zzz.r
 6df5aecc3776bc3ce985b41cdc0a85be *data/glosses_df.RData
 cbf1532a1522272b8a99c0a34b7075a6 *inst/CITATION
 9362af9a5a5ee92e2216d9bba358e0a3 *inst/rmarkdown/templates/lingglosses-document/skeleton/bibliography.bib
-82335d445d481e3ac171208a16695d2d *inst/rmarkdown/templates/lingglosses-document/skeleton/skeleton.Rmd
+087c153f6c231a641eed97df597a7e10 *inst/rmarkdown/templates/lingglosses-document/skeleton/skeleton.Rmd
 19b97c7fc4e8536824eecc0ce237e2c1 *inst/rmarkdown/templates/lingglosses-document/template.yaml
 ed7cd4966243a0f0eff621204bb483ca *man/add_gloss.Rd
 8435495432bd9e77a7b0809d467ae2a9 *man/convert_to_df.Rd
