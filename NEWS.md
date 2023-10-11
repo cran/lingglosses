@@ -1,3 +1,8 @@
+# lingglosses 0.0.7
+
+- fix by @yihui
+
+
 # lingglosses 0.0.6
 
 - small fix for CRAN
