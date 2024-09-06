@@ -1,14 +1,14 @@
-796f1917f226169b9af15354fc04769d *DESCRIPTION
+301115ac7d3b7e3993e242dd2ac8cb20 *DESCRIPTION
 444fb66c87d04e6a18261ce4a64a3c7d *NAMESPACE
-4d38f310f2a0152ae4fbef3b51a75d9c *NEWS.md
+1e29d8f80dd9d589eb4127b44d074558 *NEWS.md
 fd8fd155f9c392fa6f085a2daa41901d *R/add_gloss.R
 1c72cfa6afa6fd86e3337cffaedb8008 *R/convert_to_df.R
 38860f6342212a418613579e37413488 *R/get_examples_db.R
 3492d6ab9f14825e1b5ffb2263d4e190 *R/gloss_example.R
-7ad053ddee7d387a87e0c8806e8d8b2e *R/glosses_df.R
+f4439622f88f1a67393f2dccbbd620a7 *R/glosses_df.R
 4e4a879f4513e9dc4787db69b5bf51a4 *R/make_gloss_list.R
 cf8b76fe3c05f5c77f25f38f3402152c *R/zzz.r
-6df5aecc3776bc3ce985b41cdc0a85be *data/glosses_df.RData
+fe63bdfbacb2fcb1491838918129ac51 *data/glosses_df.RData
 a3c5be1e9ca1ca436330efb5b88c5de9 *inst/CITATION
 9362af9a5a5ee92e2216d9bba358e0a3 *inst/rmarkdown/templates/lingglosses-document/skeleton/bibliography.bib
 087c153f6c231a641eed97df597a7e10 *inst/rmarkdown/templates/lingglosses-document/skeleton/skeleton.Rmd
@@ -17,7 +17,7 @@ ed7cd4966243a0f0eff621204bb483ca *man/add_gloss.Rd
 8435495432bd9e77a7b0809d467ae2a9 *man/convert_to_df.Rd
 3269d9be56fd0333fb7297913b753537 *man/get_examples_db.Rd
 0d9e0e7cbb95725021158529872b8ee0 *man/gloss_example.Rd
-72733da35c441e61a42c08c80531a284 *man/glosses_df.Rd
+eb5638b7157e176b2eba6d3aa12e9547 *man/glosses_df.Rd
 0a6a8e4a9fdce066458c3cab35eb0aff *man/make_gloss_list.Rd
 29e3a16296eee51d43e62aff10152798 *tests/testthat.R
 a85c668495f57c6715d69bb09a7b479f *tests/testthat/_snaps/color_annotate.md
