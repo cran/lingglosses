@@ -34,6 +34,14 @@
 #'               "I cannot fly.",
 #'               intext = TRUE)
 #'
+#'
+#' @importFrom gt gt
+#' @importFrom gt tab_footnote
+#' @importFrom gt tab_options
+#' @importFrom gt fmt_markdown
+#' @importFrom gt md
+#' @importFrom gt as_word
+#' @importFrom gt opt_table_lines
 #' @importFrom knitr is_latex_output
 #' @importFrom knitr is_html_output
 #' @importFrom kableExtra kable_minimal
@@ -250,6 +258,9 @@ gloss_example <- function(transliteration,
           result <- cbind(matrix(c("", grammaticality, "")), result)
         }
       }
+
+      if (isTRUE(knitr::opts_knit$get('rmarkdown.pandoc.to') != "docx")) {
+
       result <- kableExtra::kbl(result, align = "l", centering = FALSE,
                                 escape = FALSE, vline = "")
       result <- kableExtra::kable_minimal(result,
@@ -311,13 +322,42 @@ gloss_example <- function(transliteration,
         result <- gsub("\\\\bottomrule", "", result)
         result <- gsub("\\\\hline", "", result)
       }
+
+    } else {
+      result <- gt::gt(as.data.frame(result))
+      result <- gt::tab_options(result,
+                                column_labels.hidden = TRUE,
+                                table.align = "left")
+      result <- gt::opt_table_lines(result, extent = "none")
+      result <- gt::fmt_markdown(result)
+
+      if(nchar(free_translation) > 0){
+        result <- gt::tab_footnote(data = result,
+                                   footnote = paste0("'",
+                                                     gt::md(free_translation),
+                                                     "'"))
+      }
+      if(nchar(comment) > 0){
+        result <- gt::tab_footnote(data = result,
+                                   footnote = gt::md(comment))
+      }
+    }
     }
   }
 
 # return output ------------------------------------------------------------
   if(length(unique(splits_by_line)) > 1){
-    cat(unlist(multiline_result))
-  } else{
+    if (isTRUE(knitr::opts_knit$get('rmarkdown.pandoc.to') == "docx")) {
+      for(i in multiline_result) {
+        cat("```{=openxml}",
+            gt::as_word(i, keep_with_next = FALSE),
+            "```\n <br> \n",
+            sep = "\n")
+      }
+    } else {
+      cat(unlist(multiline_result))
+    }
+  } else {
     return(result)
   }
 }

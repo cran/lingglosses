@@ -2,7 +2,7 @@ Package: lingglosses
 Type: Package
 Title: Interlinear Glossed Linguistic Examples and Abbreviation Lists
         Generation
-Version: 0.0.8
+Version: 0.0.9
 Depends: R (>= 3.5.0)
 Authors@R: person("George", "Moroz",
                   role = c("aut", "cre"),
@@ -20,12 +20,12 @@ LazyData: true
 URL: https://CRAN.R-project.org/package=phonfieldwork,
         https://agricolamz.github.io/lingglosses/
 BugReports: https://github.com/agricolamz/lingglosses/issues
-Imports: kableExtra, knitr, rmarkdown, utils, htmltools, methods
-RoxygenNote: 7.3.2
+Imports: kableExtra, knitr, gt, rmarkdown, utils, htmltools, methods
+RoxygenNote: 7.3.2.9000
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2024-09-05 20:36:38 UTC; agricolamz
+Packaged: 2025-03-05 17:07:17 UTC; agricolamz
 Author: George Moroz [aut, cre] (<https://orcid.org/0000-0003-1990-6083>)
 Repository: CRAN
-Date/Publication: 2024-09-06 12:50:02 UTC
+Date/Publication: 2025-03-05 17:50:02 UTC
