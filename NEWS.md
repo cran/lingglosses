@@ -1,3 +1,7 @@
+# lingglosses 0.0.10
+
+- fix delimiter problems; probably also closes #25
+
 # lingglosses 0.0.9
 
 - add `docx` compatibility
